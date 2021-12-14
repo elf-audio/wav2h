@@ -37,6 +37,9 @@ void zapGremlins(std::string &s) {
 	for(int i = 0; i < s.size(); i++) {
 		if(s[i]==' ') s[i] = '_';
 		if(s[i]==':') s[i] = '_';
+		if(s[i]=='.') s[i] = '_';
+		if(s[i]==',') s[i] = '_';
+		if(s[i]==';') s[i] = '_';
 		if(s[i]=='/') s[i] = '_';
 		if(s[i]=='-') s[i] = '_';
 		if(s[i]=='+') s[i] = '_';
@@ -141,33 +144,39 @@ int main(int argc, char *argv[]) {
 	} else if(fs::is_directory(p)) {
 		
 		std::vector<std::string> names;
+		std::vector<std::string> filenames;
+
+		std::vector<fs::path> samplePaths;
 
 		for(auto &fp : fs::directory_iterator(p)) {
-			
-			
-
 			if(fp.path().extension()==".wav" || fp.path().extension()==".WAV") {
-				
-				std::string name;
-				std::string out;
-				if(!wav2h(fp.path(), name, out)) {
-					printf("Failed to read %s\n", fp.path().string().c_str());
-				}
-
-				names.push_back(name);
-
-				if(writeFiles) {
-					auto path = p / (name + ".h");
-					if(!writeStringToFile(path.string(), out)) {
-						printf("Failed to write to %s\n", path.c_str());
-						return 1;	
-					}
-					printf("Wrote to %s\n", path.c_str());	
-				} else {
-					printf("%s\n", out.c_str());
-				}
+				samplePaths.push_back(fp.path());
 			}
 		}
+
+		std::sort(samplePaths.begin(), samplePaths.end());
+			
+		for( auto &fp : samplePaths) {
+			std::string name;
+			std::string out;
+			if(!wav2h(fp, name, out)) {
+				printf("Failed to read %s\n", fp.string().c_str());
+			}
+			filenames.push_back(fp.filename().string());
+			names.push_back(name);
+
+			if(writeFiles) {
+				auto path = p / (name + ".h");
+				if(!writeStringToFile(path.string(), out)) {
+					printf("Failed to write to %s\n", path.c_str());
+					return 1;	
+				}
+				printf("Wrote to %s\n", path.c_str());	
+			} else {
+				printf("%s\n", out.c_str());
+			}
+		}
+		
 
 		std::string samplesH;
 		if(writeFiles) {
@@ -187,7 +196,7 @@ int main(int argc, char *argv[]) {
 		
 		samplesH += "\n\nstd::vector<std::string> sampleNames = {\n";
 		
-		for(const auto &n : names) {
+		for(const auto &n : filenames) {
 			samplesH += "\t\"" + n + "\",\n";
 		}
 		
