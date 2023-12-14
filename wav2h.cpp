@@ -129,10 +129,10 @@ bool wav2h(const fs::path &p, std::string &name, std::string &out, double resamp
 }
 
 void printUsage(char *appName) {
-	printf("\nUsage\n\n\t%s <path> [-f]\n\n", appName);
+	printf("\nUsage\n\n\t%s <path> [-f] [-t type] [-r factor]\n\n", appName);
 	printf("\t-f \t write files instead of std::out\n\n");
-	printf("\t[-t] \t convert to a type - options are uint8, int16, float (default)\n\n");
-	printf("\t[-r] \t resample factor, eg 1 is no change (default), 2.0 is half the sample rate\n\n");
+	printf("\t-t \t convert to a type - options are uint8, int16, float (default)\n\n");
+	printf("\t-r \t resample factor, eg 1 is no change (default), 2.0 is half the sample rate\n\n");
 }
 
 bool writeStringToFile(const std::string &path, const std::string &data) {
@@ -163,6 +163,9 @@ int main(int argc, char *argv[]) {
 
 	if (argc >= 2) {
 		p = argv[1];
+	} else {
+		printUsage(argv[0]);
+		return 1;
 	}
 
 	for (int i = 2; i < argc; i++) {
